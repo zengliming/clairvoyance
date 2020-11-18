@@ -1,0 +1,7 @@
+apply plugin: "checkstyle"
+checkstyle {
+    toolVersion = "8.1"
+    configFile = file("checkstyle.xml")
+    // 只输出提示，不会影响编译
+    ignoreFailures = true
+}

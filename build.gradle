@@ -1,17 +1,35 @@
 plugins {
     id 'java'
+    id 'idea'
+    id "org.springframework.boot" version "2.2.5.RELEASE"
 }
+apply plugin: 'io.spring.dependency-management'
+apply from: rootProject.file("checkstyle.gradle")
 
 group 'cn.zlmthy'
 version '1.0-SNAPSHOT'
 
+def bootVersion = '2.2.5.RELEASE'
+
 repositories {
+    maven {
+        url = 'https://maven.aliyun.com/nexus/content/groups/public/'
+    }
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-starter-parent:${bootVersion}"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Finchley.SR2"
+    }
+}
+
 def luceneVersion = "8.7.0"
+def lombokVersion = '1.18.8'
 
 dependencies {
+    compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.apache.lucene:lucene-core:${luceneVersion}"
     // lucnene解析包
     compile "org.apache.lucene:lucene-queryparser:${luceneVersion}"
@@ -22,4 +40,9 @@ dependencies {
     // 关键词高亮显示
     compile "org.apache.lucene:lucene-highlighter:${luceneVersion}"
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    //lombok
+    compile "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
 }
