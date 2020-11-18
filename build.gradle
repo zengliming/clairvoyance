@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+}
+
+group 'cn.zlmthy'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+def luceneVersion = "8.7.0"
+
+dependencies {
+    compile "org.apache.lucene:lucene-core:${luceneVersion}"
+    // lucnene解析包
+    compile "org.apache.lucene:lucene-queryparser:${luceneVersion}"
+    // lucene 公共包分析器
+    compile "org.apache.lucene:lucene-analyzers-common:${luceneVersion}"
+    // 中文分词
+    compile "org.apache.lucene:lucene-analyzers-smartcn:${luceneVersion}"
+    // 关键词高亮显示
+    compile "org.apache.lucene:lucene-highlighter:${luceneVersion}"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
