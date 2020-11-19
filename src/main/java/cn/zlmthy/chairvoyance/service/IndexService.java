@@ -15,14 +15,28 @@ public interface IndexService {
 
     /**
      * 写入索引
-     * @param data
+     *
+     * @param dto
+     * @throws IOException
      */
     void write(AddIndexDataDTO dto) throws IOException;
 
     /**
      * 查询
+     *
+     * @param collect
      * @param query
+     * @param key
      * @return
+     * @throws IOException
+     * @throws ParseException
      */
-    List<String> search(String query, String key) throws ParseException, IOException;
+    List<String> search(String collect, String query, String key) throws ParseException, IOException;
+
+    /**
+     * 删除集合下所有的索引
+     *
+     * @param collect
+     */
+    void delAll(String collect) throws IOException;
 }

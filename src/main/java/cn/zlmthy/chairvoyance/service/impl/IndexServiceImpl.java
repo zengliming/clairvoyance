@@ -15,14 +15,18 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.MMapDirectory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author liming zeng
@@ -34,15 +38,17 @@ public class IndexServiceImpl implements IndexService {
     @Resource
     private SmartChineseAnalyzer smartChineseAnalyzer;
 
-    @Resource
-    private MMapDirectory mMapDirectory;
+    @Value("${index.path:'./index'}")
+    private String indexPath;
+
+    private final ConcurrentMap<String, MMapDirectory> directoryMap = new ConcurrentHashMap<>();
 
     @Override
     public void write(AddIndexDataDTO dto) throws IOException {
 
         IndexWriter indexWriter = null;
         try {
-            indexWriter = new IndexWriter(mMapDirectory, new IndexWriterConfig(this.smartChineseAnalyzer));
+            indexWriter = new IndexWriter(getDirectory(dto.getCollect()), new IndexWriterConfig(this.smartChineseAnalyzer));
             List<Map<String, Object>> data = dto.getData();
             for (Map<String, Object> map : data) {
                 Document document = new Document();
@@ -55,7 +61,7 @@ public class IndexServiceImpl implements IndexService {
                 indexWriter.addDocument(document);
             }
 
-        }finally {
+        } finally {
             if (Objects.nonNull(indexWriter)) {
                 indexWriter.commit();
                 indexWriter.close();
@@ -64,8 +70,8 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public List<String> search(String query, String key) throws ParseException, IOException {
-        IndexSearcher indexSearcher = new IndexSearcher(DirectoryReader.open(mMapDirectory));
+    public List<String> search(String collect, String query, String key) throws ParseException, IOException {
+        IndexSearcher indexSearcher = new IndexSearcher(DirectoryReader.open(getDirectory(collect)));
         final QueryParser queryParser = new QueryParser(key, smartChineseAnalyzer);
         final TopDocs topDocs = indexSearcher.search(queryParser.parse(query), 10);
         List<String> result = new ArrayList<>();
@@ -74,5 +80,32 @@ public class IndexServiceImpl implements IndexService {
             result.add(doc.get(key));
         }
         return result;
+    }
+
+    private synchronized MMapDirectory getDirectory(String collect) throws IOException {
+        MMapDirectory mMapDirectory = directoryMap.get(collect);
+        if (Objects.isNull(mMapDirectory)) {
+            synchronized (this) {
+                mMapDirectory = new MMapDirectory(Paths.get(indexPath + collect));
+                directoryMap.put(collect, mMapDirectory);
+            }
+        }
+        return mMapDirectory;
+    }
+
+    @Override
+    public void delAll(String collect) throws IOException {
+
+        IndexWriter indexWriter = null;
+        try {
+            indexWriter = new IndexWriter(getDirectory(collect), new IndexWriterConfig(this.smartChineseAnalyzer));
+            indexWriter.deleteAll();
+        } finally {
+            if (Objects.nonNull(indexWriter)) {
+                indexWriter.commit();
+                indexWriter.close();
+            }
+        }
+
     }
 }

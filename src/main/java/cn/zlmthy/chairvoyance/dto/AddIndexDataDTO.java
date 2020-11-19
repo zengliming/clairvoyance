@@ -14,6 +14,6 @@ public class AddIndexDataDTO {
 
     private String collect;
 
-    private List<Map<String,Object>> data;
+    private List<Map<String, Object>> data;
 
 }

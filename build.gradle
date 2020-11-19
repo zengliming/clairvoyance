@@ -18,13 +18,6 @@ repositories {
     mavenCentral()
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.boot:spring-boot-starter-parent:${bootVersion}"
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Finchley.SR2"
-    }
-}
-
 def luceneVersion = "8.7.0"
 def lombokVersion = '1.18.8'
 

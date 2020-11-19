@@ -31,9 +31,9 @@ public class IndexController {
     }
 
     @GetMapping("/search")
-    public List<String> search(@RequestParam String query,@RequestParam String targetKey) {
+    public List<String> search(@RequestParam String query, @RequestParam String targetKey) {
         try {
-            return indexService.search(query, targetKey);
+            return indexService.search("", query, targetKey);
         } catch (ParseException | IOException e) {
             e.printStackTrace();
         }
